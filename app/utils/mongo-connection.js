@@ -1,19 +1,18 @@
 'use strict';
-
+const debug = require('debug')('messenger-bot:server')
 const mongoose = require('mongoose');
 const options = { keepAlive: 1, connectTimeoutMS: 3000, useNewUrlParser: true, useUnifiedTopology: true };
 const url = "mongodb://localhost:27017/MessengerBot"
 mongoose.connect(url, options)
 let mongo = mongoose.connection
-console.info("Connecting to database...!")
 mongo.on('open', () => {
-    console.info('Database connected...!')
+    debug('Database connected...!')
 })
 mongo.on('disconnected', () => {
-    console.error('Database server disconnected...!')
+    debug('Database server disconnected...!')
 })
 mongo.on('reconnected', () => {
-    console.info('Trying to reconnect with database')
+    debug('Trying to reconnect with database')
 })
 mongo.on('error', (error) => {
     console.error('\n\nDatabase connection Error', error)

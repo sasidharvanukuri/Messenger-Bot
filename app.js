@@ -1,3 +1,5 @@
+;`use strict`;
+
 require('debug-trace')({
   always: true
 })
@@ -8,16 +10,35 @@ const cors = require('cors');
 const helmet = require('helmet');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
-require('./app/utils/mongo-connection');
+
+// ! Mongo database connection
+require('./app/utils/mongo-connection')
+require('./app/utils/models-loader');
 const app = express();
 
 app.use(cors())
 app.use(helmet())
 app.use(logger('dev'));
+
+/**
+ * Custome middleware 
+ * @description To test incoming request object
+ * For debugging and etc.
+ */
 app.use(function(req, res, next){
   console.log(req.method, req.originalUrl)
   next()
 })
+
+/**
+ * @function Rawbody Middleware
+ * ! For Signature verification - Even bit alteration can give side effects
+ * In typical - we use JSON data parsers for development
+ * But it changes incomming data to JS object
+ * 
+ * @description To handle and store buffer data for signature verfication
+ * 
+ */
 app.use(bodyParser.json({
   verify: function (req, res, buf) {
     const url = req.originalUrl;
@@ -27,18 +48,24 @@ app.use(bodyParser.json({
   }
 }));
 
-// app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// ! ALL the routes goes here
+//*--------------------------------------------------------------------------------
 app.use("", require('./app/routes/webhooks'))
+//*--------------------------------------------------------------------------------
 
-// catch 404 and forward to error handler
+// ! catch 404 and forward to error handler
+// This is interesting middleware 
 app.use(function (req, res, next) {
-  next(new Error(404));
+  let err = new Error("Not Found")
+  err.status = 404
+  next(err);
 });
 
-// error handler
+// ! Application Error Handler
+// * Global Type errors, function handling error
+// ? not promise exception
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   console.error(err)

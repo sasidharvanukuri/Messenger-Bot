@@ -97,7 +97,7 @@ class Webhooks {
             console.info(webhook_event)
             if (webhook_event.message) {
                 promises.push(
-                    EventHandler.handleTextMessage(webhook_event)
+                    EventHandler.handleMessage(webhook_event)
                 )
             } else if (webhook_event.postback) {
                 promises.push(

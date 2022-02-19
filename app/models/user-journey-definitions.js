@@ -9,7 +9,7 @@
  */
 
 
-// TODO - In Future store user jounrney defenitions in DB
+// TODO - In Future store user jounrney definitions in DB
 
 let road_map = {
     "1": {
@@ -69,7 +69,7 @@ let road_map = {
             "function": "calculateDayOfDOB",
             "data": {
                 "message": {
-                    "value": `There are ${output.data} days left until your next birthday`
+                    "value": `There are {output.data} days left until your next birthday`
                 }
             }
         }

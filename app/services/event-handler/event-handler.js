@@ -1,15 +1,15 @@
 `use strict`;
 const request = require('request');
 const Messenger = require('../messenger/messenger');
-
 /**
  * @class EvenHandler
  * @link https://github.com/fbsamples/messenger-platform-samples/blob/main/node/app.js
  */
 class EventHandler {
-    handleTextMessage(webhook_event) {
+    async handleMessage(webhook_event) {
 
         let message_object = flattenEventObject(webhook_event)
+        await recordMessage(message_object)
 
        
     }

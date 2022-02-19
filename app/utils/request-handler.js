@@ -5,6 +5,8 @@
  * @param {*} method 
  * @param  {...any} args 
  * @returns None
+ * @description Request Handler middleware
+ * Used currying and JS first class object function
  */
 module.exports = function (method, ...args) {
     return function (req, res, next) {

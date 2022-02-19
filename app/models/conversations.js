@@ -11,7 +11,9 @@ const Conversations = new Schema({
         type: String,
         index: true,
         enum: [
-            "messenger"
+            "messenger",
+            "instagram",
+            "whatsapp"
         ]
     },
     sender_id: {

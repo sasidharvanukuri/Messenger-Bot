@@ -4,7 +4,8 @@ const Schema = mongoose.Schema
 const UserJourneyProgress = new Schema({
 
     sender_id: {
-        type: String
+        type: String,
+        index:true
     },
     current_journey_id: {
         type: Number

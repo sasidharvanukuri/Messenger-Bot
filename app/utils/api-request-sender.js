@@ -10,6 +10,7 @@ module.exports.sendRequest = function (options) {
 
     return Request(options).then(data => {
         //TODO : Handling responses and etc.
+        console.log(data)
         return data
     }).catch(e => {
         console.error(e);

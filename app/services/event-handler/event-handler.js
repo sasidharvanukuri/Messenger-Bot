@@ -21,22 +21,24 @@ class EventHandler {
     }
     async handleMessage(webhook_event) {
         try {
-            let event = flattenEventObject(webhook_event)
+            let event = this.flattenEventObject(webhook_event)
             let convo = await this.storeUserConversation(event)
             let user = await this.handleUserDetails(event);
             let journey = await this.getJourneyDetails(user);
+            console.log(journey)
             await this.journeyHandler(journey, event);
 
         }
         catch (e) {
+            //!!!!!!!
             console.error(e)
         }
 
     }
 
-    journeyHandler(journey, event){
+    async journeyHandler(journey, event){
         if(journey.handle){
-
+            await this.execJourney(journey, event)
 
         }else{
             return Promise.resolve({"status":true})
@@ -66,12 +68,32 @@ class EventHandler {
         } else {
             // * send message and update message_sent as true
             if(journey_object.type == "text"){
-
+                let msg = await Messenger.sendTextMessage(event, journey_object.text)
+                let bot_convo = await this.storeBotConversation(msg)
             }else if(journey_object.type == "quick_reply"){
 
             }else{
                 return Promise.resolve({"status":true})
             }
+        }
+    }
+
+    async storeBotConversation(data) {
+        try {
+            let createdConvo = await Coversations.create({
+                "message_id": uuid(),
+                "platform": "messenger",
+                "sender_id": data.sender_id,
+                "receiver_id": data.recipient_id,
+                "conversation_type": "bot_message",
+                "platform_msg_id": data.message_id,
+                "text": data.text,
+                "message_time_stamp": data.time
+            })
+            return createdConvo
+        } catch (e) {
+            console.error(e)
+            throw e
         }
     }
 
@@ -106,15 +128,19 @@ class EventHandler {
         try {
         if (user.new_user == true) {
             let journies = []
-            for (let each in Journey) {
+            for (let each of Journey) {
                 let object = {}
                 object["journey_id"] = each["journey"]
+                object["message_sent"] = false
+                object["user_replied"] = false
+                journies.push(object)
             }
             let create_object = {
-                "sender_id": user.messenger_sender_id,
+                "sender_id": user.user_data.messenger_sender_id,
                 "current_journey_id": 1,
                 "journies": journies
             }
+            console.log(create_object)
             let user_progress = await UserJourneyProgress.create(create_object);
             return {
                 "handle":true,
@@ -122,9 +148,13 @@ class EventHandler {
                 "progress_object": user_progress
             }
         } else if (user.user_data.user_journey_completed == false) {
-            let user_progress = await UserJourneyProgress.findOne({
-                "sender_id":user.messenger_sender_id,
+            console.log({
+                "sender_id":user.user_data.messenger_sender_id,
             })
+            let user_progress = await UserJourneyProgress.findOne({
+                "sender_id":user.user_data.messenger_sender_id,
+            })
+            console.log(user_progress)
             return {
                 "handle":true,
                 "journey": Journey[user_progress.current_journey_id - 1],
@@ -171,8 +201,9 @@ class EventHandler {
                 "message_id": uuid(),
                 "platform": "messenger",
                 "sender_id": data.sender_id,
-                "receiver_id": data.receiver_id,
-                "platform_msg_id": "user_message",
+                "receiver_id": data.recipient_id,
+                "conversation_type": "user_message",
+                "platform_msg_id": data.message_id,
                 "text": data.text,
                 "message_time_stamp": data.time
             })
@@ -206,28 +237,6 @@ class EventHandler {
     //     this.callSendAPI(senderPsid, response);
     // }
 
-    callSendAPI(senderPsid, response) {
-        const PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_TOKEN;
-        let requestBody = {
-            'recipient': {
-                'id': senderPsid
-            },
-            'message': response
-        };
-        request({
-            'uri': 'https://graph.facebook.com/v13.0/me/messages',
-            'qs': { 'access_token': PAGE_ACCESS_TOKEN },
-            'method': 'POST',
-            'json': requestBody
-        }, (err, _res, _body) => {
-            if (!err) {
-                console.log(_body)
-                console.log('Message sent!');
-            } else {
-                console.error('Unable to send message:' + err);
-            }
-        });
-    }
 }
 
 

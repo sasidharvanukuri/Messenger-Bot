@@ -67,16 +67,19 @@ class Webhooks {
                 let response = new Response()
                 if (body_data.object === 'page') {
                     await this.handleEvents(body_data)
+                    console.info('200 OK SENT')
                     return response.statusCode(200).setData("Event Received").send();
                 } else {
                     return response.statusCode(404).send()
                 }
             } else {
+                console.info('200 NOT OK SENT')
                 return response.statusCode(200).send()
             }
         } catch (e) {
             console.error(e)
             // TODO handling
+            console.info('500 SENT')
             return response.statusCode(500).send()
         }
     }

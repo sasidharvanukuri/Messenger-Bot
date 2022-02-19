@@ -1,28 +1,47 @@
 `use strict`;
 
+const { sendRequest } = require('../../utils/api-request-sender');
 class Messenger {
 
 
-    handleConversation(sender_psid, received_message) {
+    async sendTextMessage(event, text) {
+        let options = this.buildTextMessagePayload(event, text)
         try {
-            if (receivedMessage.text) {
-
-            } else {
-                this.handleEdgeCase()
+            let res = await sendRequest(options)
+            return {
+                "recipient_id": res.recipient_id,
+                "message_id": res.message_id,
+                "text": text,
+                "sender_id": event.recipient_id,
+                "time": new Date().toISOString
             }
         } catch (e) {
+            console.log("ERROR: While handling text msg")
             console.error(e)
+            throw e
         }
     }
 
-    sendTextMessage() {
 
-    }
-
-    buildTextMessagePayload() {
-        response = {
-            'text': "Attachment feature is not supported 😔"
+    buildTextMessagePayload(event, text) {
+        const PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_TOKEN; // TODO
+        let requestBody = {
+            'recipient': {
+                'id': event.sender_id
+            },
+            'message': {
+                'text': text
+            }
         };
+        let options = {
+            'uri': 'https://graph.facebook.com/v13.0/me/messages',
+            'qs': { 'access_token': PAGE_ACCESS_TOKEN },
+            'method': 'POST',
+            'body': requestBody,
+            "json": true
+        }
+
+        return options
     }
 
     sendQuickMessage() {

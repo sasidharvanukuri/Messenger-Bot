@@ -16,8 +16,12 @@ const Users = new Schema({
     },
     dob: {
         type: String
+    },
+    user_journey_completed: {
+        type: Boolean,
+        default:false
     }
 })
 
 
-mongoose.model('Users', Users, 'users');
+module.exports = mongoose.model('Users', Users, 'users');

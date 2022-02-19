@@ -31,14 +31,14 @@ const Conversations = new Schema({
     conversation_type: {
         type: String,
         enum: [
-            "user_messages",
-            "bot_messages"
+            "user_message",
+            "bot_message"
         ]
     },
-    convo_text: {
+    text: {
         type: String
     }
 })
 
 
-mongoose.model('Conversations', Conversations, 'conversations');
+module.exports = mongoose.model('Conversations', Conversations, 'conversations');

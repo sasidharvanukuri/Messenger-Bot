@@ -83,3 +83,63 @@ let road_map = {
         },
     }
 }
+
+
+let pace = [
+    {
+        "journey":1,
+        "name":"ask_name",
+        "type":"text",
+        "text": "Can you tell us your name?",
+        "on_reply": {
+            "type":"model",
+            "model":"Users",
+            "query":{
+                "messenger_sender_id": "output.sender.id",
+            },
+            "data_mapping": {
+                "name" : "output.message.text"
+            }
+        },
+        "send_next":true
+    },
+    {
+        "journey":2,
+        "name":"ask_dob",
+        "type":"text",
+        "text":"Please send us your Date of birth...",
+        "on_reply": {
+            "type":"model",
+            "model":"Users",
+            "query":{
+                "messenger_sender_id": "output.sender.id",
+            },
+            "data_mapping": {
+                "dob" : "output.message.text"
+            }
+        },
+        "send_next":true
+    },
+    {
+        "journey":3,
+        "name":"days_question",
+        "type":"quick_reply",
+        "text":"Want to know how many days left for your next birthday..?",
+        "values":["Yes", "No"],
+        "on_reply": {
+            "type":"self",
+            "3.yes.*":{
+                "type":"handler",
+                "handler":"sendUserDOBInDays"
+            },
+            "3.no.*":{
+                "type":"text",
+                "text": "Goodbye 👋 !!!"
+            }
+          
+        },
+    }
+] 
+
+
+module.exports = pace

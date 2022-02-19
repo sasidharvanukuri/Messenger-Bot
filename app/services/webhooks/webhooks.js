@@ -95,9 +95,13 @@ class Webhooks {
             let sender_psid = webhook_event.sender.id;
             console.info('Sender PSID: ' + sender_psid);
             console.info(webhook_event)
-            if (webhook_event.message) {
+            if (webhook_event.message && webhook_event.message.quick_reply == undefined) {
                 promises.push(
                     EventHandler.handleMessage(webhook_event)
+                )
+            }else if(webhook_event.message && webhook_event.message.quick_reply != undefined){
+                promises.push(
+                    EventHandler.handleQuickReply(webhook_event)
                 )
             } else if (webhook_event.postback) {
                 promises.push(

@@ -20,11 +20,11 @@ let road_map = {
             }
         },
         "handler": {
-            "type":"transaction",
-            "function" : "storeUserDetails",
+            "type": "transaction",
+            "function": "storeUserDetails",
             "data_mapping": {
                 "messenger_id": "sender.id",
-                "name":"message.text"
+                "name": "message.text"
             }
         }
     },
@@ -36,10 +36,10 @@ let road_map = {
             }
         },
         "handler": {
-            "type":"transaction",
-            "function" : "storeUserDOB",
+            "type": "transaction",
+            "function": "storeUserDOB",
             "data_mapping": {
-                "dob":"message.text"
+                "dob": "message.text"
             }
         }
     },
@@ -64,7 +64,7 @@ let road_map = {
     },
     "3.yes": {
         "type": "text.dynamic",
-        "handler":{
+        "handler": {
             "type": "analytics",
             "function": "calculateDayOfDOB",
             "data": {
@@ -87,59 +87,73 @@ let road_map = {
 
 let pace = [
     {
-        "journey":1,
-        "name":"ask_name",
-        "type":"text",
+        "journey": 1,
+        "name": "ask_name",
+        "type": "text",
         "text": "Can you tell us your name?",
         "on_reply": {
-            "type":"model",
-            "model":"Users",
-            "query":{
-                "messenger_sender_id": "output.sender.id",
+            "type": "model",
+            "model": "Users",
+            "query": {
+                "messenger_sender_id": {
+                    type: "dynamic", // dynamic, static
+                    value: "event.sender_id",
+                    default: "Something" // incase of nothing computed
+                },
             },
             "data_mapping": {
-                "name" : "output.message.text"
+                "name": {
+                    type: "dynamic",
+                    value: "event.text"
+                }
             }
         },
-        "send_next":true
+        "send_next": true
     },
     {
-        "journey":2,
-        "name":"ask_dob",
-        "type":"text",
-        "text":"Please send us your Date of birth...",
+        "journey": 2,
+        "name": "ask_dob",
+        "type": "text",
+        "text": "Please send us your Date of birth...",
         "on_reply": {
-            "type":"model",
-            "model":"Users",
-            "query":{
-                "messenger_sender_id": "output.sender.id",
+            "type": "model",
+            "model": "Users",
+            "query": {
+                "messenger_sender_id": {
+                    type: "dynamic",
+                    value: "event.sender_id",
+                }
             },
             "data_mapping": {
-                "dob" : "output.message.text"
+                "dob": {
+                    type: "dynamic",
+                    value: "event.text"
+                }
             }
         },
-        "send_next":true
+        "send_next": true
     },
     {
-        "journey":3,
-        "name":"days_question",
-        "type":"quick_reply",
-        "text":"Want to know how many days left for your next birthday..?",
-        "values":["Yes", "No"],
+        "journey": 3,
+        "name": "days_question",
+        "type": "quick_reply",
+        "text": "Want to know how many days left for your next birthday..?",
+        "values": ["Yes", "No"],
         "on_reply": {
-            "type":"self",
-            "3.yes.*":{
-                "type":"handler",
-                "handler":"sendUserDOBInDays"
+            "type": "self",
+            "3.yes.*": {
+                "type": "handler",
+                "handler": "sendUserDOBInDays"
             },
-            "3.no.*":{
-                "type":"text",
+            "3.no.*": {
+                "type": "text",
                 "text": "Goodbye 👋 !!!"
             }
-          
+
         },
+        "is_last":true
     }
-] 
+]
 
 
 module.exports = pace

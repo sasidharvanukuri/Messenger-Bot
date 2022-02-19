@@ -6,7 +6,7 @@ const url = "mongodb://localhost:27017/MessengerBot"
 mongoose.connect(url, options)
 let mongo = mongoose.connection
 mongo.on('open', () => {
-    debug('Database connected...!')
+    debug('Connected to database...!')
 })
 mongo.on('disconnected', () => {
     debug('Database server disconnected...!')

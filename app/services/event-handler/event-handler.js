@@ -51,30 +51,82 @@ class EventHandler {
         let progress_object = _.find(journey["progress_object"]["journies"],{
             "journey_id": journey_object["journey"]
         })
-        if (progress_object.message_sent == true) {
+        if (progress_object.message_sent == true && progress_object.user_replied == false) {
             // * update user_replied as true
             if (journey_object.on_reply.type == "model") {
                 let model = journey_object.on_reply.model
-                let query = objectBuilder(event, journey_object.on_reply.query)
-                let data = objectBuilder(event, journey_object.on_reply.data_mapping)
+                let query = this.objectBuilder(event, journey_object.on_reply.query)
+                let data = this.objectBuilder(event, journey_object.on_reply.data_mapping)
                 let res = await this.execModel(model, query, data)
+                //!if last no need to update journeyID
+                let new_progress = this.updateReceivedProgress({
+                    "sender_id":event.sender_id,
+                    "journey_id": journey_object["journey"],
+                    "new_journey_id": journey_object["journey"]+1
+                })
                 if(journey_object.send_next==true){
                     // handle next journey
+                }else{
+
                 }
             }
             if(journey_object.on_reply.type == "self"){
 
             }
-        } else {
+        } else if(progress_object.message_sent == false){
             // * send message and update message_sent as true
             if(journey_object.type == "text"){
                 let msg = await Messenger.sendTextMessage(event, journey_object.text)
                 let bot_convo = await this.storeBotConversation(msg)
+                let new_progress = await this.updateSentProgress({
+                    "sender_id":event.sender_id,
+                    "journey_id": journey_object["journey"]
+                })
             }else if(journey_object.type == "quick_reply"){
 
             }else{
                 return Promise.resolve({"status":true})
             }
+        }else{
+            console.log("No Journey to move next")
+        }
+    }
+
+
+    async updateReceivedProgress(data){
+        try {
+            let res = await UserJourneyProgress.findOneAndUpdate(
+                { "sender_id": data.sender_id, "journies.journey_id": data.journey_id },
+                {
+                    "$set": {
+                        'journies.$.user_replied': true,
+                        "journey_id": data.new_journey_id
+                    }
+                }
+            )
+            return res
+        } catch (e) {
+            console.log("ERROR: While updating received progress")
+            console.error(e)
+            throw e
+        }
+    }
+
+    async updateSentProgress(data) {
+        try {
+            let res = await UserJourneyProgress.findOneAndUpdate(
+                { "sender_id": data.sender_id, "journies.journey_id": data.journey_id },
+                {
+                    "$set": {
+                        'journies.$.message_sent': true
+                    }
+                }
+            )
+            return res
+        } catch (e) {
+            console.log("ERROR: While updating sent progress")
+            console.error(e)
+            throw e
         }
     }
 
@@ -97,15 +149,13 @@ class EventHandler {
         }
     }
 
-    async updateProgress(){
-
-    }
 
     async execModel(model_name, query, data){
         try {
-            Users.findOneAndUpdate()
-            let data = await MODELS[model_name].findOneAndUpdate(query, data)
-            return data
+            console.log(query, data
+                )
+            let res = await MODELS[model_name].findOneAndUpdate(query, data)
+            return res
         }catch(e){
             console.log('ERROR: While ExecModel')
             throw e
@@ -122,6 +172,7 @@ class EventHandler {
                 data[each] = object[each][value]
             }
         }
+        return data
     }
 
     async getJourneyDetails(user) {

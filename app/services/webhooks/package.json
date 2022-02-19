@@ -1,0 +1,11 @@
+{
+  "name": "webhooks",
+  "version": "1.0.0",
+  "description": "Webhooks Handling",
+  "main": "webhooks.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "sasidhar vanukuri",
+  "license": "ISC"
+}

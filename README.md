@@ -1,5 +1,7 @@
 # Messenger-Bot
 
+Application Messenger bot handles user messages, user journies, API's, etc
+
 ## Prerequisite
 1. `Nodejs` > 12.20.0
 2. Install `BetterComments` Extension in VScode

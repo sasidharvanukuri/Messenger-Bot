@@ -1,5 +1,7 @@
 # Messenger-Bot
 
+Application Messenger bot handles user messages, user journies, API's, etc
+
 ## Prerequisite
 1. `Nodejs` > 12.20.0
 2. Install `BetterComments` Extension in VScode
@@ -79,6 +81,18 @@ npm start
 - Error Handling
 - Testing scripts
 - Deployment scripts, etc
+
+---
+
+**image**
+- Search your app `Eg: privatespace.in`
+
+![Screenshot 2022-02-20 at 4 48 19 PM](https://user-images.githubusercontent.com/51639105/154840282-5219f8e8-8540-450f-b258-1b33136ddf38.png)
+
+---
+**Testing Gif**
+
+![Gif](https://user-images.githubusercontent.com/51639105/154840578-f2624d8e-6dd1-4845-9c3d-c193ffe210a2.gif)
 
 
 

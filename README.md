@@ -13,7 +13,8 @@
 │   ├── routes              # Express Modular Routes
 │   ├── services            # All the business and Modules goes here
 │   │   ├── event-handler   # Event handler module
-│   │   ├── messenger
+│   │   ├── messenger       # Messenger Message type
+│   │   ├── messenges       # API methods
 │   │   └── webhooks        # Webhook Handler Class
 │   └── utils               # All the universal, reusable function goes here
 ├── bin                     # Contain WWW file - Handles http connections, Server main entry
@@ -44,6 +45,16 @@ npm run serve
 ```sh
 npm start
 ```
+- Visit facebook developer
+    - create APP
+    - Click on `Messenger setup`
+    - Select facebook page to integrate webhook
+    - Copy `FACEBOOK_PAGE_TOKEN` store it in `.env`
+    - Integrate webhook end points `secret text`
+    - Store `secret text` as `WEBHOOK_SECRET` in `.env`
+    - For singnature verification
+        - `APP_ID`
+        - `APP_SECRET`
 
 ---
 
@@ -63,9 +74,10 @@ npm start
 
 ---
 **Backlog**
+- Config Setup
 - Refactoring 
 - Error Handling
-- Testing scrips
+- Testing scripts
 - Deployment scripts, etc
 
 

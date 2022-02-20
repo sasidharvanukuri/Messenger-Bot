@@ -47,6 +47,7 @@ class EventHandler {
 
     async execJourney(journey, event){
         // is_last checker
+        console.log("MMMMAAAAAAAIN",journey)
         let journey_object = journey["journey"]
         let progress_object = _.find(journey["progress_object"]["journies"],{
             "journey_id": journey_object["journey"]
@@ -59,15 +60,20 @@ class EventHandler {
                 let data = this.objectBuilder(event, journey_object.on_reply.data_mapping)
                 let res = await this.execModel(model, query, data)
                 //!if last no need to update journeyID
-                let new_progress = this.updateReceivedProgress({
+                let new_progress = await this.updateReceivedProgress({
                     "sender_id":event.sender_id,
                     "journey_id": journey_object["journey"],
                     "new_journey_id": journey_object["journey"]+1
                 })
                 if(journey_object.send_next==true){
-                    // handle next journey
+                    // * Need to be careful - Recurrsion.
+                    let new_journey = this.getNextJourney(new_progress);
+                    return await this.execJourney(new_journey, event)
                 }else{
-
+                    return {
+                        "status":true,
+                        "message": "No journey"
+                    }
                 }
             }
             if(journey_object.on_reply.type == "self"){
@@ -83,6 +89,7 @@ class EventHandler {
                     "journey_id": journey_object["journey"]
                 })
             }else if(journey_object.type == "quick_reply"){
+                let msg = await Messenger.sendQuickMessage(event, journey_object.text, journey_object.values)
 
             }else{
                 return Promise.resolve({"status":true})
@@ -90,6 +97,17 @@ class EventHandler {
         }else{
             console.log("No Journey to move next")
         }
+    }
+
+    async getNextJourney(progress) {
+        // TODO - More conditions check
+        // TODO - data base query for consistency
+        let object = {
+            "journey": Journey[progress.current_journey_id],
+            "progress_object": progress
+        }
+        console.log(object)
+        return object
     }
 
 
@@ -103,7 +121,7 @@ class EventHandler {
                         "journey_id": data.new_journey_id
                     }
                 }
-            )
+            ).lean()
             return res
         } catch (e) {
             console.log("ERROR: While updating received progress")
@@ -121,7 +139,7 @@ class EventHandler {
                         'journies.$.message_sent': true
                     }
                 }
-            )
+            ).lean()
             return res
         } catch (e) {
             console.log("ERROR: While updating sent progress")
@@ -141,7 +159,7 @@ class EventHandler {
                 "platform_msg_id": data.message_id,
                 "text": data.text,
                 "message_time_stamp": data.time
-            })
+            }).lean()
             return createdConvo
         } catch (e) {
             console.error(e)
@@ -192,7 +210,7 @@ class EventHandler {
                 "journies": journies
             }
             console.log(create_object)
-            let user_progress = await UserJourneyProgress.create(create_object);
+            let user_progress = await UserJourneyProgress.create(create_object).lean()
             return {
                 "handle":true,
                 "journey": Journey[0],
@@ -204,7 +222,7 @@ class EventHandler {
             })
             let user_progress = await UserJourneyProgress.findOne({
                 "sender_id":user.user_data.messenger_sender_id,
-            })
+            }).lean()
             console.log(user_progress)
             return {
                 "handle":true,
@@ -233,7 +251,7 @@ class EventHandler {
                 let createdUser = await Users.create({
                     "user_id": uuid(),
                     "messenger_sender_id": message_object.sender_id
-                })
+                }).lean()
                 return {
                     "new_user": true,
                     "user_data": createdUser
@@ -257,7 +275,7 @@ class EventHandler {
                 "platform_msg_id": data.message_id,
                 "text": data.text,
                 "message_time_stamp": data.time
-            })
+            }).lean()
             return createdConvo
         } catch (e) {
             console.error(e)

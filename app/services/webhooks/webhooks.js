@@ -44,7 +44,7 @@ class Webhooks {
                     response.statusCode(403);
                 }
             }
-            return response.statusCode(403).send()
+            return response.send()
         } catch (e) {
             console.error(e)
             throw e

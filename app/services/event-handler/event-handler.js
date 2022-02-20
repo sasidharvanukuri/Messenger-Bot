@@ -176,7 +176,7 @@ class EventHandler {
         console.log(user)
         let DOB = Moment(user.user_data.dob)
         console.log(DOB)
-        let TODAY = Moment()
+        let TODAY = Moment().startOf('day')
         let yearValid = DOB.isBefore(TODAY, 'year')
         let days;
         if (yearValid) {

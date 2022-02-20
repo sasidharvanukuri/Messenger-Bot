@@ -44,7 +44,7 @@ class Webhooks {
                     response.statusCode(403);
                 }
             }
-            return response.send()
+            return response.statusCode(403).send()
         } catch (e) {
             console.error(e)
             throw e
@@ -74,7 +74,11 @@ class Webhooks {
                 }
             } else {
                 console.info('200 NOT OK SENT')
-                return response.statusCode(200).send()
+                return response.statusCode(200).setData({
+                    status: false,
+                    error_code: "SIGNATURE_VERIFICATION_FAILED",
+                    message: "Verification failed"
+                }).send()
             }
         } catch (e) {
             console.error(e)

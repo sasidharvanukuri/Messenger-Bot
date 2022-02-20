@@ -8,9 +8,6 @@ const app = require('../app');
 const debug = require('debug')('messenger-bot:server');
 const http = require('http');
 
-const Dotenv = require('dotenv')
-Dotenv.config({ silent: true })
-
 /**
  * Get port from environment and store in Express.
  */

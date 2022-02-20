@@ -4,6 +4,8 @@ require('debug-trace')({
   always: true
 })
 
+const Dotenv = require('dotenv')
+Dotenv.config({ silent: true })
 
 const express = require('express');
 const cors = require('cors');

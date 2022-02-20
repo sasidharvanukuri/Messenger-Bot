@@ -2,7 +2,7 @@
 const debug = require('debug')('messenger-bot:server')
 const mongoose = require('mongoose');
 const options = { keepAlive: 1, connectTimeoutMS: 3000, useNewUrlParser: true, useUnifiedTopology: true };
-const url = "mongodb://localhost:27017/MessengerBot"
+const url = process.env.MONGODB;
 mongoose.connect(url, options)
 let mongo = mongoose.connection
 mongo.on('open', () => {

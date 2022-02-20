@@ -1,3 +1,6 @@
+#!/bin/bash
+
+
 cat >> /etc/systemd/system/messenger_bot.service <<EOT
 [Unit]
 Description=Messenger Bot

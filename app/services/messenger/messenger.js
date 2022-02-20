@@ -63,7 +63,7 @@ class Messenger {
     }
 
     buildQuickMessagePayload(event, journey_object) {
-
+        const PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_TOKEN; // TODO
         let requestBody = {}
         requestBody["recipient"] = {
             "id": event.sender_id
@@ -71,7 +71,7 @@ class Messenger {
         requestBody["message"] = {}
         requestBody["message"]["quick_replies"] = []
         requestBody["message"]["text"] = journey_object.text
-        for (let each in journey_object.values) {
+        for (let each of journey_object.values) {
             let object = {
                 "content_type": "text",
                 "title": each,
@@ -87,6 +87,7 @@ class Messenger {
             'body': requestBody,
             "json": true
         }
+        return options
     }
 
     handleEdgeCase(sender_psid, received_message) {

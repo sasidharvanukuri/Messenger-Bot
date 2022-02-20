@@ -141,11 +141,19 @@ let pace = [
         "values": ["Yes", "No"],
         "on_reply": {
             "type": "self",
-            "3.yes.*": {
+            "keys": ["3.Yes", "3.No"],
+            "3.Yes": {
                 "type": "handler",
-                "handler": "sendUserDOBInDays"
+                "handler": "sendUserDOBInDays",
+                "return_type": "text",
+                "data_mapping": {
+                    "text": {
+                        "type": "dynamic",
+                        "value": "event.data"
+                    }
+                }
             },
-            "3.no.*": {
+            "3.No": {
                 "type": "text",
                 "text": "Goodbye 👋 !!!"
             }

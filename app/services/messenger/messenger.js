@@ -44,28 +44,48 @@ class Messenger {
         return options
     }
 
-    sendQuickMessage() {
-
+    async sendQuickMessage(event, journey_object) {
+        let options = this.buildQuickMessagePayload(event, journey_object)
+        try {
+            let res = await sendRequest(options)
+            return {
+                "recipient_id": res.recipient_id,
+                "message_id": res.message_id,
+                "text": journey_object.text,
+                "sender_id": event.recipient_id,
+                "time": new Date().toISOString
+            }
+        } catch (e) {
+            console.log("ERROR: While handling text msg")
+            console.error(e)
+            throw e
+        }
     }
 
-    buildQuickMessagePayload() {
-        response = {
+    buildQuickMessagePayload(event, journey_object) {
 
-            "text": "Do you want to know how many days left till your next birhtday",
-            "quick_replies": [
-                {
-                    "content_type": "text",
-                    "title": "Yes",
-                    "payload": "3.yes",
-                    "image_url": ""
-                }, {
-                    "content_type": "text",
-                    "title": "No",
-                    "payload": "3.no",
-                    "image_url": ""
-                }
-            ]
-
+        let requestBody = {}
+        requestBody["recipient"] = {
+            "id": event.sender_id
+        }
+        requestBody["message"] = {}
+        requestBody["message"]["quick_replies"] = []
+        requestBody["message"]["text"] = journey_object.text
+        for (let each in journey_object.values) {
+            let object = {
+                "content_type": "text",
+                "title": each,
+                "payload": `${journey_object.journey}.${each}`,
+                "image_url": ""
+            }
+            requestBody["message"]["quick_replies"].push(object)
+        }
+        let options = {
+            'uri': 'https://graph.facebook.com/v13.0/me/messages',
+            'qs': { 'access_token': PAGE_ACCESS_TOKEN },
+            'method': 'POST',
+            'body': requestBody,
+            "json": true
         }
     }
 

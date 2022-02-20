@@ -48,10 +48,12 @@ class EventHandler {
     async execJourney(journey, event){
         // is_last checker
         console.log("MMMMAAAAAAAIN",journey)
+        console.log(_.has(journey, "progress_object"))
         let journey_object = journey["journey"]
         let progress_object = _.find(journey["progress_object"]["journies"],{
             "journey_id": journey_object["journey"]
         })
+        console.log("PROGRESS", progress_object)
         if (progress_object.message_sent == true && progress_object.user_replied == false) {
             // * update user_replied as true
             if (journey_object.on_reply.type == "model") {
@@ -63,11 +65,12 @@ class EventHandler {
                 let new_progress = await this.updateReceivedProgress({
                     "sender_id":event.sender_id,
                     "journey_id": journey_object["journey"],
-                    "new_journey_id": journey_object["journey"]+1
+                    "new_journey_id": journey_object["journey"] + 1
                 })
                 if(journey_object.send_next==true){
                     // * Need to be careful - Recurrsion.
                     let new_journey = this.getNextJourney(new_progress);
+                    console.log(new_journey)
                     return await this.execJourney(new_journey, event)
                 }else{
                     return {
@@ -89,7 +92,7 @@ class EventHandler {
                     "journey_id": journey_object["journey"]
                 })
             }else if(journey_object.type == "quick_reply"){
-                let msg = await Messenger.sendQuickMessage(event, journey_object.text, journey_object.values)
+                let msg = await Messenger.sendQuickMessage(event, journey_object)
 
             }else{
                 return Promise.resolve({"status":true})
@@ -99,30 +102,30 @@ class EventHandler {
         }
     }
 
-    async getNextJourney(progress) {
+    getNextJourney(progress) {
         // TODO - More conditions check
         // TODO - data base query for consistency
         let object = {
             "journey": Journey[progress.current_journey_id],
             "progress_object": progress
         }
-        console.log(object)
-        return object
+        return JSON.parse(JSON.stringify(object))
     }
 
 
     async updateReceivedProgress(data){
+        console.log(data)
         try {
             let res = await UserJourneyProgress.findOneAndUpdate(
                 { "sender_id": data.sender_id, "journies.journey_id": data.journey_id },
                 {
                     "$set": {
                         'journies.$.user_replied': true,
-                        "journey_id": data.new_journey_id
+                        "current_journey_id": data.new_journey_id
                     }
                 }
             ).lean()
-            return res
+            return JSON.parse(JSON.stringify(res))
         } catch (e) {
             console.log("ERROR: While updating received progress")
             console.error(e)
@@ -140,7 +143,7 @@ class EventHandler {
                     }
                 }
             ).lean()
-            return res
+            return JSON.parse(JSON.stringify(res))
         } catch (e) {
             console.log("ERROR: While updating sent progress")
             console.error(e)
@@ -159,7 +162,7 @@ class EventHandler {
                 "platform_msg_id": data.message_id,
                 "text": data.text,
                 "message_time_stamp": data.time
-            }).lean()
+            })
             return createdConvo
         } catch (e) {
             console.error(e)
@@ -173,7 +176,7 @@ class EventHandler {
             console.log(query, data
                 )
             let res = await MODELS[model_name].findOneAndUpdate(query, data)
-            return res
+            return JSON.parse(JSON.stringify(res))
         }catch(e){
             console.log('ERROR: While ExecModel')
             throw e
@@ -210,7 +213,8 @@ class EventHandler {
                 "journies": journies
             }
             console.log(create_object)
-            let user_progress = await UserJourneyProgress.create(create_object).lean()
+            let user_progress = await UserJourneyProgress.create(create_object)
+            user_progress = JSON.parse(JSON.stringify(user_progress))
             return {
                 "handle":true,
                 "journey": Journey[0],
@@ -223,7 +227,7 @@ class EventHandler {
             let user_progress = await UserJourneyProgress.findOne({
                 "sender_id":user.user_data.messenger_sender_id,
             }).lean()
-            console.log(user_progress)
+            console.log(user_progress, user_progress.current_journey_id)
             return {
                 "handle":true,
                 "journey": Journey[user_progress.current_journey_id - 1],
@@ -241,7 +245,7 @@ class EventHandler {
 
     async handleUserDetails(message_object) {
         try {
-            let user = await Users.findOne({ "messenger_sender_id": message_object.sender_id })
+            let user = await Users.findOne({ "messenger_sender_id": message_object.sender_id }).lean()
             if (user) {
                 return {
                     "new_user": false,
@@ -251,7 +255,7 @@ class EventHandler {
                 let createdUser = await Users.create({
                     "user_id": uuid(),
                     "messenger_sender_id": message_object.sender_id
-                }).lean()
+                })
                 return {
                     "new_user": true,
                     "user_data": createdUser
@@ -275,7 +279,7 @@ class EventHandler {
                 "platform_msg_id": data.message_id,
                 "text": data.text,
                 "message_time_stamp": data.time
-            }).lean()
+            })
             return createdConvo
         } catch (e) {
             console.error(e)

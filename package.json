@@ -1,7 +1,7 @@
 {
   "name": "messenger-bot",
   "version": "1.0.0",
-  "description": "Stores user conversation, Reply user conversations, Webhook Handling",
+  "description": "Stores user conversation, Reply user conversations, Webhook Handling, API's",
   "scripts": {
     "preinstall": "node ./scripts/preinstall.js",
     "serve": "DEBUG=messenger-bot:* node-dev bin/www",

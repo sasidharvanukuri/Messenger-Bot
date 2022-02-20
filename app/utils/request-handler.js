@@ -16,7 +16,7 @@ module.exports = function (method, ...args) {
             res.locals.data = undefined
         }
         method(...args).then((data, error)=>{
-            if(data.parse_response == true){
+            if( data && data.parse_response == true){
                 res.locals.parse = true
                 delete parse_response
                 Object.assign(res.locals, data)

@@ -1,0 +1,140 @@
+{
+	"info": {
+		"_postman_id": "508c65e1-c871-4292-ba9a-073addf879bc",
+		"name": "Messenger Bot",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Webhooks",
+			"item": [
+				{
+					"name": "Verification Webhook API",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/webhook?hub.mode=subscribe&hub.verify_token=one2three3&hub.challenge=Hello",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"webhook"
+							],
+							"query": [
+								{
+									"key": "hub.mode",
+									"value": "subscribe"
+								},
+								{
+									"key": "hub.verify_token",
+									"value": "one2three3"
+								},
+								{
+									"key": "hub.challenge",
+									"value": "Hello"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Event data collector webhook",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/webhook",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"webhook"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Messages",
+			"item": [
+				{
+					"name": "Get User Messages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/messages?user_id=7143456129030370&conversation_type=user_message",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"messages"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "7143456129030370"
+								},
+								{
+									"key": "conversation_type",
+									"value": "user_message"
+								},
+								{
+									"key": "conversation_type",
+									"value": "bot_message",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Message Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/messages/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"messages",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "7616da53-f980-4b5c-8c29-0ce258c801c7"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Users Summary",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/summary",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"summary"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

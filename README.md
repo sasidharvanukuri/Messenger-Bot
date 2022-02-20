@@ -24,4 +24,52 @@
 
 ---
 
+**Project setup**
+- Open preferred terminal
+- Change directory to prject directory
+    - `Eg: cd Messenger-Bot`
+- Run `npm install` command
+```sh
+npm install 
+```
+- Create .env
+    - `Eg: cp .env_sample .env`
+    - `Eg: touch .env` - create env variables
+
+- To run development server
+```sh
+npm run serve
+```
+- To run production server
+```sh
+npm start
+```
+
+---
+
+**Testing**
+
+- Run `npm test`
+---
+**Reference Links**
+
+[Facebook Developer](https://developers.facebook.com/)
+
+[App Creation](https://developers.facebook.com/docs/messenger-platform/getting-started/app-setup)
+
+[Webhook setup](https://developers.facebook.com/docs/messenger-platform/getting-started/webhook-setup)
+
+
+
+---
+**Backlog**
+- Refactoring 
+- Error Handling
+- Testing scrips
+- Deployment scripts, etc
+
+
+
+
+
 

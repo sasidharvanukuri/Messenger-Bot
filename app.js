@@ -18,7 +18,13 @@ const app = express();
 
 app.use(cors())
 app.use(helmet())
-app.use(logger('dev'));
+
+// Refer - morgan documentation
+logger.token("date", function (req) {
+  return new Date().toISOString().replace("Z", "")
+})
+
+app.use(logger(':date: :remote-addr - :remote-user ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" [:response-time ms]'));
 
 /**
  * Custome middleware 
@@ -26,7 +32,7 @@ app.use(logger('dev'));
  * For debugging and etc.
  */
 app.use(function(req, res, next){
-  console.log(req.method, req.originalUrl)
+  // console.log(req.method, req.originalUrl)
   next()
 })
 
@@ -52,7 +58,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // ! ALL the routes goes here
 //*--------------------------------------------------------------------------------
-app.use("", require('./app/routes/webhooks'))
+app.use("", require('./app/routes/webhooks'));
+app.use("", require('./app/routes/messages'));
 //*--------------------------------------------------------------------------------
 
 // ! catch 404 and forward to error handler

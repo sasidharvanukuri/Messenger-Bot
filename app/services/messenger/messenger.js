@@ -89,10 +89,6 @@ class Messenger {
         }
         return options
     }
-
-    handleEdgeCase(sender_psid, received_message) {
-
-    }
 }
 
 module.exports = new Messenger()

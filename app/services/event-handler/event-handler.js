@@ -1,5 +1,5 @@
 `use strict`;
-const request = require('request');
+
 const Messenger = require('../messenger/messenger');
 const Coversations = require('../../models/conversations');
 const Users = require('../../models/users');
@@ -30,6 +30,7 @@ class EventHandler {
             let user = await this.handleUserDetails(event);
             let journey = await this.getJourneyDetails(user);
             let data = await this.journeyHandler(journey, event, user);
+            console.log(data)
             return data
         }
         catch (e) {
@@ -41,23 +42,17 @@ class EventHandler {
     async journeyHandler(journey, event, user) {
         if (journey.handle) {
             await this.execJourney(journey, event, user)
-
         } else {
-            return Promise.resolve({ "status": true })
+            return Promise.resolve({ "status": true, message: "User journey completed." })
         }
     }
 
     async execJourney(journey, event, user) {
-        // is_last checker
-        console.log("MMMMAAAAAAAIN", journey)
-        console.log(_.has(journey, "progress_object"))
         let journey_object = journey["journey"]
         let progress_object = _.find(journey["progress_object"]["journies"], {
             "journey_id": journey_object["journey"]
         })
-        console.log("PROGRESS", progress_object)
         if (progress_object.message_sent == true && progress_object.user_replied == false) {
-            // * update user_replied as true
             if (journey_object.on_reply.type == "model") {
                 let model = journey_object.on_reply.model
                 let query = this.objectBuilder(event, journey_object.on_reply.query)
@@ -71,33 +66,7 @@ class EventHandler {
                 if (journey_object.is_last) {
                     console.log("Came to last")
                     progress_update_data["is_final"] = true
-                    //update progress to final
-                    // update user to journey completed
-                    // TODO handle in getJourneyDetails
                 }
-                if (event.quick_reply) {
-                    if(event.quick_reply in journey_object.on_reply){
-                        let action_object = journey_object["on_reply"][event.quick_reply]
-                        if (action_object.type == "handler"){
-
-                            // handle methods
-                            // store bot
-                            //send text message
-
-                        }else if(action_object.type == "text"){
-                            // handle text message
-                            // store bot
-                        }else{
-
-                        }
-                    }else{
-                        return {
-                            "status":true,
-                            "message": "Unknown Quick Reply"
-                        }
-                    }
-                }
-                //!if last no need to update journeyID
                 let new_progress = await this.updateReceivedProgress(progress_update_data)
                 if (journey_object.send_next == true) {
                     // * Need to be careful - Recurrsion.
@@ -111,8 +80,64 @@ class EventHandler {
                     }
                 }
             }
-            if (journey_object.on_reply.type == "self") {
-                console.log("to handle quick reply")
+            if (event.quick_reply && journey_object.on_reply.type == "self") {
+                let progress_update_data = {
+                    "sender_id": event.sender_id,
+                    "journey_id": journey_object["journey"],
+                    "new_journey_id": (journey_object.is_last) ? journey_object["journey"] : journey_object["journey"] + 1
+                }
+                if (journey_object.is_last) {
+                    console.log("Came to last")
+                    progress_update_data["is_final"] = true
+                }
+                let new_progress = await this.updateReceivedProgress(progress_update_data)
+                if (event.quick_reply in journey_object.on_reply) {
+                    let action_object = journey_object["on_reply"][event.quick_reply]
+                    if (action_object.type == "handler") {
+                        let output = this[action_object.handler](user)
+                        let handler_date = this.objectBuilder(output, action_object.data_mapping);
+                        if (action_object.return_type) {
+                            let msg = await Messenger.sendTextMessage(event, handler_date.text)
+                            let bot_convo = await this.storeBotConversation(msg)
+                            let user_journey_completed = await Users.findOneAndUpdate({ "user_id": user.user_data.user_id },
+                                {
+                                    user_journey_completed: true
+                                })
+                            return {
+                                "status": true,
+                                "message": "Handled"
+                            }
+                        } else {
+                            console.log("No return type")
+                            return {
+                                "status": false,
+                                "message": "No handler"
+                            }
+                        }
+                    } else if (action_object.type == "text") {
+                        let msg = await Messenger.sendTextMessage(event, action_object.text)
+                        let bot_convo = await this.storeBotConversation(msg)
+                        let user_journey_completed = await Users.findOneAndUpdate({ "user_id": user.user_data.user_id },
+                            {
+                                user_journey_completed: true
+                            })
+                        return {
+                            "status": true,
+                            "message": "Handled"
+                        }
+                    } else {
+                        console.log("No action type");
+                        return {
+                            "status": false,
+                            "message": "No handler"
+                        }
+                    }
+                } else {
+                    return {
+                        "status": true,
+                        "message": "Unknown Quick Reply"
+                    }
+                }
 
             }
         } else if (progress_object.message_sent == false) {
@@ -124,6 +149,10 @@ class EventHandler {
                     "sender_id": event.sender_id,
                     "journey_id": journey_object["journey"]
                 })
+                return {
+                    "status": true,
+                    "message": "Text Message Sent"
+                }
             } else if (journey_object.type == "quick_reply") {
                 let msg = await Messenger.sendQuickMessage(event, journey_object)
                 let bot_convo = await this.storeBotConversation(msg)
@@ -131,6 +160,10 @@ class EventHandler {
                     "sender_id": event.sender_id,
                     "journey_id": journey_object["journey"]
                 })
+                return {
+                    "status": true,
+                    "message": "Quick Message Sent"
+                }
             } else {
                 return Promise.resolve({ "status": true })
             }
@@ -140,8 +173,10 @@ class EventHandler {
     }
 
     sendUserDOBInDays(user) {
-        let DOB = Moment(user.dob)
-        let TODAY = Moment().format('YYYY-MM-DD')
+        console.log(user)
+        let DOB = Moment(user.user_data.dob)
+        console.log(DOB)
+        let TODAY = Moment()
         let yearValid = DOB.isBefore(TODAY, 'year')
         let days;
         if (yearValid) {
@@ -156,8 +191,10 @@ class EventHandler {
                     days = 0
                 } else if (THIS_YEAR_DOB.diff(TODAY, "days") < 0) {
                     days = NEXT_YEAR_DOB.diff(TODAY, "days")
+                    console.log(days)
                 } else {
-                    days = DOB.diff(TODAY, "days")
+                    days = THIS_YEAR_DOB.diff(TODAY, "days")
+                    console.log(days)
                 }
             }
             if (days == 0) {
@@ -310,7 +347,7 @@ class EventHandler {
                     "progress_object": user_progress
                 }
             } else {
-                return Promise.resolve({ "handle": false })
+                return Promise.resolve({ "status": true, "message": "Journey Completed" })
             }
         }
         catch (e) {

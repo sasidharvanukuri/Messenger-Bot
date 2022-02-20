@@ -1,5 +1,7 @@
 #!/bin/bash
 
+apt-get -y install nodejs
+
 rm -rf /etc/systemd/system/messenger_bot.service
 
 cat >> /etc/systemd/system/messenger_bot.service <<EOT

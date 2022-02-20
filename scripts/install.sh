@@ -1,5 +1,6 @@
 #!/bin/bash
 
+rm -rf /etc/systemd/system/messenger_bot.service
 
 cat >> /etc/systemd/system/messenger_bot.service <<EOT
 [Unit]
